@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- 开启下划线自动转驼峰式命名法 create_time -> createTime -->
+        <setting name="mapUnderscoreToCamelCase" value="true" />
+        <!-- 打印查询语句 -->
+        <setting name="logImpl" value="STDOUT_LOGGING" />
+    </settings>
+    <typeAliases>  
+<!--         <typeAlias alias="About" type="com.yzw.zb.api.model.About"/>   -->
+        <package name="com.example.demo.model" />
+    </typeAliases>
+</configuration>

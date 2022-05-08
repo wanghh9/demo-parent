@@ -1,0 +1,58 @@
+# Tomcat
+server:
+    tomcat:
+      uri-encoding: utf-8
+    port: 8000
+#    servlet:
+#      context-path: /demo
+
+spring:
+    application:
+        name: demo
+    # 环境 dev|test|proc
+    profiles:
+        active: ~profileActive~
+    #druid配置需要本地自行指定驱动类
+    datasource:
+        driverClassName: com.mysql.cj.jdbc.Driver
+        initialization-mode: NEVER
+        type: com.alibaba.druid.pool.DruidDataSource
+
+    # jackson时间格式化
+    jackson:
+        time-zone: GMT+8
+        date-format: yyyy-MM-dd HH:mm:ss
+    http:
+        multipart:
+            enabled: true
+            max-file-size: 100MB
+            max-request-size: 100MB
+
+    jpa:
+       hibernate:
+         ddl-auto: update #自动更新
+       show-sql: true  #日志中显示sql语句
+    #该参数默认设置为：classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,servlet context:/
+   # resources:
+   #    static-locations: classpath:templates/,classpath:static/
+
+# Mybatis配置
+mybatis:
+    mapperLocations: classpath:mapper/*.xml
+    configLocation: classpath:mybatis.xml
+
+
+
+---
+#本地环境
+spring:
+#  profiles: local
+
+
+---
+#开发环境
+spring:
+  profiles: dev
+
+
+

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="false" scanPeriod="10 seconds">
+
+    <springProperty scope="context" name="springAppName" source="spring.application.name" />
+
+    <!-- 默认输出到应用同级目录logs/应用名下 -->
+    <property name="LOG_FILE_PATH" value="logs/${springAppName}"></property>
+
+    <!-- 生产环境 -->
+    <springProfile name="uat,prod">
+        <property name="root.level" value="INFO" />
+        <property name="LOG_FILE_PATH" value="logs/"></property>
+    </springProfile>
+
+    <!-- 历史日志目录 -->
+    <property name="HIS_FILE_PATH" value="${LOG_FILE_PATH}/%d{yyyy-MM-dd}"></property>
+
+    <!-- 日志保留天数 -->
+    <property name="MAX_HISTORY" value="7"></property>
+
+    <!-- 日志文件size -->
+    <property name="TOTAL_SIZE_CAP" value="10GB"></property>
+
+    <!-- 控台日志打印格式 -->
+    <property name="LOG_PATTERN" value="%date %-5level %-85([%thread] [%file:%line] %logger{35}) - %msg%n%rEx{full,
+     java.lang.reflect.Method,
+     sun.reflect,
+     org.apache.catalina,
+     org.springframework.aop,
+     org.springframework.security,
+     org.springframework.transaction,
+     org.springframework.web,
+     org.springframework.beans,
+     org.springframework.cglib,
+     net.sf.cglib,
+     org.apache.tomcat.util,
+     org.apache.coyote,
+     ByCGLIB,
+     BySpringCGLIB,
+     com.google.common.cache.LocalCache$
+	}" />
+
+    <!-- 控制台日志打印 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- <withJansi>true</withJansi> -->
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 应用日志打印 -->
+    <appender name="APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${LOG_FILE_PATH}/app.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${HIS_FILE_PATH}/app.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <!-- 异步-应用日志打印 -->
+    <appender name="ASYNC-APP" class="ch.qos.logback.classic.AsyncAppender">
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="APP" />
+    </appender>
+
+    <!-- SQL日志打印 -->
+    <appender name="SQL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}/sql.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${HIS_FILE_PATH}/sql.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 异步-SQL日志打印 -->
+    <appender name="ASYNC-SQL" class="ch.qos.logback.classic.AsyncAppender">
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="SQL" />
+    </appender>
+
+
+    <!-- MQ日志打印 -->
+    <appender name="MQ" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}/mq.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${HIS_FILE_PATH}/mq.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 异步-MQ日志打印 -->
+    <appender name="ASYNC-MQ" class="ch.qos.logback.classic.AsyncAppender">
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="MQ" />
+    </appender>
+
+    <!-- SQL日志打印 -->
+    <logger name="com.apache.ibatis" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC-SQL" />
+    </logger>
+    <logger name="java.sql" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC-SQL" />
+    </logger>
+    <logger name="com.alibaba.druid" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC-SQL" />
+    </logger>
+
+    <!-- MQ日志单独处理 -->
+    <logger name="org.springframework.amqp" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC-MQ" />
+    </logger>
+
+
+    <!-- 取配置的root.level 默认DEBUG -->
+    <root level="${root.level:-INFO}">
+        <!-- 只在本地打印控制台日志 -->
+        <springProfile name="local">
+            <appender-ref ref="CONSOLE" />
+        </springProfile>
+        <appender-ref ref="ASYNC-APP" />
+    </root>
+</configuration>
